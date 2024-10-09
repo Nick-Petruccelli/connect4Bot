@@ -6,6 +6,9 @@ Board::Board(int width, int height) {
   mBoardWidth = width;
   mBoardHeight = height;
   mBoard = (int *)malloc(width * height * sizeof(int));
+  for (int i = 0; i < width * height; i++) {
+    mBoard[i] = 0;
+  }
 }
 
 Board::~Board() { free(mBoard); }
