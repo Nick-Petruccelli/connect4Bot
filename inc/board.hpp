@@ -4,7 +4,7 @@ class Board {
 public:
   Board(int width, int height);
   ~Board();
-  void placeToken(int col, bool player);
+  void placeToken(int col, int player);
   int getColHeight(int col);
   int checkWin();
   void printBoard();

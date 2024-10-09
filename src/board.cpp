@@ -19,9 +19,9 @@ int Board::getColHeight(int col) {
   return -1;
 }
 
-void Board::placeToken(int col, bool player) {
+void Board::placeToken(int col, int player) {
   int height = getColHeight(col);
-  mBoard[(height * mBoardWidth) + col] = player ? 1 : -1;
+  mBoard[(height * mBoardWidth) + col] = player;
 }
 
 void Board::printBoard() {
