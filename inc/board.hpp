@@ -13,4 +13,8 @@ private:
   int *mBoard;
   int mBoardWidth;
   int mBoardHeight;
+  bool checkRight(int row, int col);
+  bool checkDiLeft(int row, int col);
+  bool checkUp(int row, int col);
+  bool checkDiRight(int row, int col);
 };

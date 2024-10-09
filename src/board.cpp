@@ -36,3 +36,70 @@ void Board::printBoard() {
     std::cout << std::endl;
   }
 }
+
+int Board::checkWin() {
+  bool win = false;
+  for (int row = 0; row < mBoardHeight; row++) {
+    for (int col = 0; col < mBoardWidth; col++) {
+      win |= checkRight(row, col);
+      win |= checkDiLeft(row, col);
+      win |= checkUp(row, col);
+      win |= checkDiRight(row, col);
+      if (win)
+        return mBoard[(row * mBoardWidth) + col];
+    }
+  }
+  return 0;
+}
+
+bool Board::checkRight(int row, int col) {
+  int player = mBoard[(row * mBoardWidth) + col];
+  if (player == 0)
+    return false;
+  for (int i = 1; i < 4; i++) {
+    col++;
+    if (col >= mBoardWidth)
+      return false;
+    if (mBoard[(row * mBoardWidth) + col] != player)
+      return false;
+  }
+  return true;
+}
+
+bool Board::checkDiLeft(int row, int col) {
+  int player = mBoard[(row * mBoardWidth) + col];
+  for (int i = 1; i < 4; i++) {
+    row++;
+    col--;
+    if (row >= mBoardHeight || col < 0)
+      return false;
+    if (mBoard[(row * mBoardWidth) + col] != player)
+      return false;
+  }
+  return true;
+}
+
+bool Board::checkUp(int row, int col) {
+  int player = mBoard[(row * mBoardWidth) + col];
+  for (int i = 1; i < 4; i++) {
+    row++;
+    if (row >= mBoardHeight)
+      return false;
+    if (mBoard[(row * mBoardWidth) + col] != player)
+      return false;
+  }
+  return true;
+}
+
+bool Board::checkDiRight(int row, int col) {
+  int player = mBoard[(row * mBoardWidth) + col];
+  for (int i = 1; i < 4; i++) {
+    row++;
+    col++;
+    if (row >= mBoardHeight || col >= mBoardWidth)
+      return false;
+    if (mBoard[(row * mBoardWidth) + col] != player)
+      return false;
+  }
+  return true;
+}
