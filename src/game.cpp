@@ -1,4 +1,5 @@
 #include "../inc/game.hpp"
+#include "../inc/abSearch.hpp"
 #include <iostream>
 #include <limits>
 
@@ -14,7 +15,14 @@ void Game::startGame() {
   int player = 1;
   int winner = 0;
   mBoard.printBoard();
+  Node node;
+  int turn = 0;
   while (running) {
+    if (turn == 3) {
+      node.generateChildren(&mBoard);
+      std::cout << "Node child len: " << node.getNumChildren() << std::endl;
+      std::cout << "Node[0] == " << node.getChildren()->at(0) << std::endl;
+    }
     takeInput(player);
     player = 2;
     mBoard.printBoard();
@@ -32,6 +40,7 @@ void Game::startGame() {
       break;
     }
     mBoard.printBoard();
+    turn++;
   }
 }
 

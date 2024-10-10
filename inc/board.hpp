@@ -5,7 +5,9 @@ public:
   Board(int width, int height);
   ~Board();
   void placeToken(int col, int player);
+  void removeToken(int col);
   int getColHeight(int col);
+  bool *getValidMoves();
   int checkWin();
   void printBoard();
 

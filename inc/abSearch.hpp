@@ -7,21 +7,24 @@
 class Node {
 public:
   std::unique_ptr<Node> getParent();
-  std::array<Node *, 7> getChildren();
-  void generateChildren();
+  std::array<Node *, 7> *getChildren();
+  void generateChildren(Board *curBoard);
   int setUtility(int utility);
-  int setAlpha(int a);
-  int setBeta(int b);
+  void setAlpha(int a);
+  void setBeta(int b);
+  void setParent(Node *parent);
+  int getNumChildren();
   int getUtility();
   int getAlpha();
   int getBeta();
 
 private:
-  Node *parent;
-  std::array<Node *, 7> children;
-  int utility;
-  int alpha;
-  int beta;
+  Node *mParent;
+  std::array<Node *, 7> mChildren;
+  int mNumChildren = 0;
+  int mUtility;
+  int mAlpha;
+  int mBeta;
 };
 
 class ABSearch {
@@ -32,10 +35,14 @@ public:
   int getNextMove();
   void generateTree();
 
+protected:
+  Board mBoard;
+
 private:
   Node *mTree;
-  Board mBoard;
   Node *minMaxAB(Node *n);
   int findMaxAB(Node *n, int a, int b);
   int findMinAB(Node *n, int a, int b);
+
+  friend class Node;
 };

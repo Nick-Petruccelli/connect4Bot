@@ -1,4 +1,5 @@
 #include "../inc/board.hpp"
+#include <array>
 #include <cstdlib>
 #include <iostream>
 
@@ -22,9 +23,26 @@ int Board::getColHeight(int col) {
   return -1;
 }
 
+bool *Board::getValidMoves() {
+  static bool out[7];
+  for (int i = 0; i < 7; i++) {
+    out[i] = getColHeight(i) < 0 ? false : true;
+  }
+  return out;
+}
+
 void Board::placeToken(int col, int player) {
   int height = getColHeight(col);
   mBoard[(height * mBoardWidth) + col] = player;
+}
+
+void Board::removeToken(int col) {
+  for (int i = mBoardHeight - 1; i >= 0; i--) {
+    if (mBoard[(i * mBoardWidth) + col] != 0) {
+      mBoard[(i * mBoardWidth) + col] = 0;
+      return;
+    }
+  }
 }
 
 void Board::printBoard() {
