@@ -12,7 +12,8 @@ Board::Board(int width, int height) {
   }
 }
 
-Board::~Board() { free(mBoard); }
+Board::~Board() { /*free(mBoard);*/
+}
 
 int Board::getColHeight(int col) {
   for (int height = 0; height < mBoardHeight; height++) {
@@ -24,7 +25,7 @@ int Board::getColHeight(int col) {
 }
 
 bool *Board::getValidMoves() {
-  static bool out[7];
+  static bool out[7] = {0};
   for (int i = 0; i < 7; i++) {
     out[i] = getColHeight(i) < 0 ? false : true;
   }
@@ -62,6 +63,8 @@ int Board::checkWin() {
   bool win = false;
   for (int row = 0; row < mBoardHeight; row++) {
     for (int col = 0; col < mBoardWidth; col++) {
+      if (mBoard[(row * mBoardWidth) + col] == 0)
+        continue;
       win |= checkRight(row, col);
       win |= checkDiLeft(row, col);
       win |= checkUp(row, col);

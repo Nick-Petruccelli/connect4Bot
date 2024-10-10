@@ -1,7 +1,14 @@
 #include "../inc/abSearch.hpp"
 #include "../inc/board.hpp"
 #include <cstdlib>
+#include <iostream>
 #include <limits>
+
+ABSearch::ABSearch() : mBoard(7, 6) {}
+ABSearch::~ABSearch() {
+  if (mTree != NULL)
+    free(mTree);
+}
 
 void ABSearch::generateTree() {
   if (mTree != NULL) {
@@ -29,7 +36,7 @@ int ABSearch::findMaxAB(Node *node, int a, int b) {
   node->setAlpha(a);
   node->setBeta(b);
   for (int i = 0; i < children->size(); i++) {
-    if (children->at(i) == 0)
+    if (children->at(i) == nullptr)
       continue;
     Node *child = children->at(i);
     mBoard.placeToken(i, 1);
@@ -50,10 +57,14 @@ int ABSearch::findMinAB(Node *node, int a, int b) {
   int numChildren = node->getNumChildren();
   if (numChildren == 0)
     return mBoard.checkWin();
+  if (mBoard.checkWin() != 0)
+    return mBoard.checkWin() == 1 ? 1 : -1;
   int best = std::numeric_limits<int>::max();
   node->setAlpha(a);
   node->setBeta(b);
   for (int i = 0; i < children->size(); i++) {
+    if (children->at(i) == nullptr)
+      continue;
     Node *child = children->at(i);
     mBoard.placeToken(i, 2);
     child->setUtility(findMaxAB(child, node->getAlpha(), node->getBeta()));
@@ -67,22 +78,41 @@ int ABSearch::findMinAB(Node *node, int a, int b) {
   return best;
 }
 
+int ABSearch::getNextMove() {
+  std::array<Node *, 7> *children = mTree->getChildren();
+  int best = std::numeric_limits<int>::max();
+  int col;
+  for (int i = 0; i < 7; i++) {
+    if (children->at(i)->getUtility() < best) {
+      col = i;
+      best = children->at(i)->getUtility();
+    }
+  }
+  return col;
+}
+
+Node::Node() {}
+Node::~Node() {}
+
 void Node::generateChildren(Board *curBoard) {
   bool *moves = curBoard->getValidMoves();
   for (int i = 0; i < 7; i++) {
     if (moves[i]) {
-      Node *child;
-      child->setParent(this);
-      mChildren[i] = child;
+      static Node child;
+      mChildren[i] = &child;
       mNumChildren++;
+    } else {
+      mChildren[i] = nullptr;
     }
   }
 }
 
-void Node::setParent(Node *parent) { mParent = parent; }
-
+void Node::setUtility(int util) { mUtility = util; }
 void Node::setAlpha(int alpha) { mAlpha = alpha; }
 void Node::setBeta(int beta) { mBeta = beta; }
 
 std::array<Node *, 7> *Node::getChildren() { return &mChildren; }
 int Node::getNumChildren() { return mNumChildren; }
+int Node::getUtility() { return mUtility; }
+int Node::getAlpha() { return mAlpha; }
+int Node::getBeta() { return mBeta; }

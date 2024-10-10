@@ -6,10 +6,11 @@
 
 class Node {
 public:
-  std::unique_ptr<Node> getParent();
+  Node();
+  ~Node();
   std::array<Node *, 7> *getChildren();
   void generateChildren(Board *curBoard);
-  int setUtility(int utility);
+  void setUtility(int utility);
   void setAlpha(int a);
   void setBeta(int b);
   void setParent(Node *parent);
@@ -19,7 +20,6 @@ public:
   int getBeta();
 
 private:
-  Node *mParent;
   std::array<Node *, 7> mChildren;
   int mNumChildren = 0;
   int mUtility;
@@ -39,7 +39,7 @@ protected:
   Board mBoard;
 
 private:
-  Node *mTree;
+  Node *mTree = NULL;
   Node *minMaxAB(Node *n);
   int findMaxAB(Node *n, int a, int b);
   int findMinAB(Node *n, int a, int b);

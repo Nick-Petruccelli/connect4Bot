@@ -14,15 +14,24 @@ void Game::startGame() {
   bool running = true;
   int player = 1;
   int winner = 0;
-  mBoard.printBoard();
   Node node;
   int turn = 0;
+  ABSearch ai;
+  ai.generateTree();
+  std::cout << ai.getNextMove() << std::endl;
+  /*
+   */
   while (running) {
-    if (turn == 3) {
+    if (turn == 1) {
       node.generateChildren(&mBoard);
       std::cout << "Node child len: " << node.getNumChildren() << std::endl;
-      std::cout << "Node[0] == " << node.getChildren()->at(0) << std::endl;
+      if (node.getChildren()->at(0) != NULL) {
+        std::cout << "Node[0] == " << node.getChildren()->at(0) << std::endl;
+      }
+      /*
+       */
     }
+    mBoard.printBoard();
     takeInput(player);
     player = 2;
     mBoard.printBoard();
