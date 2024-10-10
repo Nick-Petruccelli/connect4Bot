@@ -26,17 +26,20 @@ int ABSearch::findMaxAB(Node *node, int a, int b) {
   if (numChildren == 0)
     return mBoard.checkWin();
   int best = std::numeric_limits<int>::min();
+  node->setAlpha(a);
+  node->setBeta(b);
   for (int i = 0; i < children->size(); i++) {
     if (children->at(i) == 0)
       continue;
     Node *child = children->at(i);
     mBoard.placeToken(i, 1);
-    child->setUtility(findMinAB(child, a, b));
+    child->setUtility(findMinAB(child, node->getAlpha(), node->getBeta()));
     mBoard.removeToken(i);
     best = best >= child->getUtility() ? best : child->getUtility();
-    if (best >= b)
+    if (best >= node->getBeta())
       return best;
-    a = a >= best ? a : best;
+    if (node->getAlpha() < best)
+      node->setAlpha(best);
   }
   return best;
 }
@@ -48,15 +51,18 @@ int ABSearch::findMinAB(Node *node, int a, int b) {
   if (numChildren == 0)
     return mBoard.checkWin();
   int best = std::numeric_limits<int>::max();
+  node->setAlpha(a);
+  node->setBeta(b);
   for (int i = 0; i < children->size(); i++) {
     Node *child = children->at(i);
     mBoard.placeToken(i, 2);
-    child->setUtility(findMaxAB(child, a, b));
+    child->setUtility(findMaxAB(child, node->getAlpha(), node->getBeta()));
     mBoard.removeToken(i);
     best = best <= child->getUtility() ? best : child->getUtility();
-    if (best <= a)
+    if (best <= node->getAlpha())
       return best;
-    b = b <= best ? b : best;
+    if (node->getBeta() > best)
+      node->setBeta(best);
   }
   return best;
 }
