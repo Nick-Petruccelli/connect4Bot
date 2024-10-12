@@ -41,9 +41,10 @@ protected:
 
 private:
   Node *mTree = NULL;
+  bool isLeaf(Node *node);
   void minMaxAB(Node *n);
-  int findMaxAB(Node *n, int a, int b);
-  int findMinAB(Node *n, int a, int b);
+  int findMaxAB(Node *n, int a, int b, int depth);
+  int findMinAB(Node *n, int a, int b, int depth);
   void dfsPrint(Node *n, int depth);
 
   friend class Node;

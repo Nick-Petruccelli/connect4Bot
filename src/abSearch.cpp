@@ -1,10 +1,12 @@
 #include "../inc/abSearch.hpp"
 #include "../inc/board.hpp"
 #include <algorithm>
-#include <array>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+
+unsigned int nodesVisited = 0;
+unsigned int pruned = 0;
 
 ABSearch::ABSearch(int boardWidth, int boardHeight)
     : mBoard(boardWidth, boardHeight) {}
@@ -28,38 +30,44 @@ void ABSearch::generateTree() {
 
 void ABSearch::minMaxAB(Node *root) {
   root->setUtility(findMaxAB(root, std::numeric_limits<int>::min(),
-                             std::numeric_limits<int>::max()));
+                             std::numeric_limits<int>::max(), 0));
   std::cout << "done" << std::endl;
 }
 
-int ABSearch::findMaxAB(Node *node, int a, int b) {
+int ABSearch::findMaxAB(Node *node, int a, int b, int depth) {
   /*
-  mBoard.printBoard();
-  std::cout << "++++++++++++++++++++++++++" << std::endl;
+  nodesVisited++;
+  std::cout << "nodesVisited: " << nodesVisited << std::endl;
+  std::cout << "Depth: " << depth << std::endl;
   */
-  int winner = mBoard.checkWin();
-  if (winner == 2)
-    winner = -1;
-  if (winner != 0) {
-    return winner;
+  if (isLeaf(node)) {
+    return node->getUtility();
   }
-  node->generateChildren(&mBoard);
-  std::vector<Node *> *children = node->getChildren();
-  int numChildren = node->getNumChildren();
-  if (numChildren == 0)
-    return winner;
+
   int best = std::numeric_limits<int>::min();
   node->setAlpha(a);
   node->setBeta(b);
+  std::vector<Node *> *children = node->getChildren();
+  depth++;
   for (int i = 0; i < children->size(); i++) {
-    if (children->at(i) == nullptr)
+    if (children->at(i) == nullptr) {
       continue;
+    }
     Node *child = children->at(i);
     mBoard.placeToken(i, 1);
-    child->setUtility(findMinAB(child, node->getAlpha(), node->getBeta()));
+    child->setUtility(
+        findMinAB(child, node->getAlpha(), node->getBeta(), depth));
     mBoard.removeToken(i);
     best = std::max(best, child->getUtility());
+    /*
+    std::cout << "Best: " << best << std::endl;
+    std::cout << "Beta: " << node->getBeta() << std::endl;
+    */
     if (best >= node->getBeta()) {
+      /*
+      pruned++;
+      std::cout << "Pruned: " << pruned << std::endl;
+      */
       return best;
     }
     node->setAlpha(std::max(node->getAlpha(), best));
@@ -67,39 +75,63 @@ int ABSearch::findMaxAB(Node *node, int a, int b) {
   return best;
 }
 
-int ABSearch::findMinAB(Node *node, int a, int b) {
+int ABSearch::findMinAB(Node *node, int a, int b, int depth) {
   /*
-  mBoard.printBoard();
-  std::cout << "++++++++++++++++++++++++++" << std::endl;
+  nodesVisited++;
+  std::cout << "nodesVisited: " << nodesVisited << std::endl;
+  std::cout << "Depth: " << depth << std::endl;
   */
-  int winner = mBoard.checkWin();
-  if (winner == 2)
-    winner = -1;
-  if (winner != 0) {
-    return winner;
+
+  if (isLeaf(node)) {
+    return node->getUtility();
   }
-  node->generateChildren(&mBoard);
-  std::vector<Node *> *children = node->getChildren();
-  int numChildren = node->getNumChildren();
-  if (numChildren == 0)
-    return winner;
+
   int best = std::numeric_limits<int>::max();
   node->setAlpha(a);
   node->setBeta(b);
+  std::vector<Node *> *children = node->getChildren();
+  depth++;
   for (int i = 0; i < children->size(); i++) {
     if (children->at(i) == nullptr)
       continue;
     Node *child = children->at(i);
     mBoard.placeToken(i, 2);
-    child->setUtility(findMaxAB(child, node->getAlpha(), node->getBeta()));
+    child->setUtility(
+        findMaxAB(child, node->getAlpha(), node->getBeta(), depth));
     mBoard.removeToken(i);
     best = std::min(child->getUtility(), best);
+    /*
+    std::cout << "Best: " << best << std::endl;
+    std::cout << "Alpha: " << node->getAlpha() << std::endl;
+    */
     if (best <= node->getAlpha()) {
+      /*
+      pruned++;
+      std::cout << "Pruned: " << pruned << std::endl;
+      */
       return best;
     }
     node->setBeta(std::min(node->getBeta(), best));
   }
   return best;
+}
+
+bool ABSearch::isLeaf(Node *node) {
+  int winner = mBoard.checkWin();
+  if (winner == 2)
+    winner = -1;
+  if (winner != 0) {
+    node->setUtility(winner);
+    return true;
+  }
+  node->generateChildren(&mBoard);
+  std::vector<Node *> *children = node->getChildren();
+  int numChildren = node->getNumChildren();
+  if (numChildren == 0) {
+    node->setUtility(winner);
+    return true;
+  }
+  return false;
 }
 
 void ABSearch::dfsPrint(Node *node, int depth) {
