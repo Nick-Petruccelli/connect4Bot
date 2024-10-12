@@ -15,6 +15,9 @@ Board::Board(int width, int height) {
 Board::~Board() { /*free(mBoard);*/
 }
 
+int Board::getBoardWidth() { return mBoardWidth; }
+int Board::getBoardHeight() { return mBoardHeight; }
+
 int Board::getColHeight(int col) {
   for (int height = 0; height < mBoardHeight; height++) {
     if (mBoard[(height * mBoardWidth) + col] == 0) {
@@ -25,8 +28,8 @@ int Board::getColHeight(int col) {
 }
 
 bool *Board::getValidMoves() {
-  static bool out[7] = {0};
-  for (int i = 0; i < 7; i++) {
+  bool *out = (bool *)malloc(mBoardWidth * sizeof(bool));
+  for (int i = 0; i < mBoardWidth; i++) {
     out[i] = getColHeight(i) < 0 ? false : true;
   }
   return out;

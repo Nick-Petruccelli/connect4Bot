@@ -8,6 +8,8 @@ public:
   void removeToken(int col);
   int getColHeight(int col);
   bool *getValidMoves();
+  int getBoardWidth();
+  int getBoardHeight();
   int checkWin();
   void printBoard();
 

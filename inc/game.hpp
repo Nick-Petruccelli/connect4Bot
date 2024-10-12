@@ -1,5 +1,6 @@
 #pragma once
 
+#include "abSearch.hpp"
 #include "board.hpp"
 
 class Game {
@@ -11,6 +12,7 @@ public:
 private:
   bool mMultiplayer = false;
   Board mBoard;
-  void takeInput(int player);
+  int getAIMove(ABSearch ai, int player);
+  int takeInput(int player);
   void display();
 };

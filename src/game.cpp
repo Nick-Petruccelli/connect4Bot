@@ -14,46 +14,67 @@ void Game::startGame() {
   bool running = true;
   int player = 1;
   int winner = 0;
-  Node node;
-  int turn = 0;
-  ABSearch ai;
+  ABSearch ai(BOARDWIDTH, BOARDHEIGHT);
   ai.generateTree();
-  std::cout << ai.getNextMove() << std::endl;
+  std::cout << "Tree Ptr: " << ai.getTree() << std::endl;
+  std::cout << "Tree Children Ptr: " << ai.getTree()->getChildren()->size()
+            << std::endl;
   /*
-   */
-  while (running) {
-    if (turn == 1) {
-      node.generateChildren(&mBoard);
-      std::cout << "Node child len: " << node.getNumChildren() << std::endl;
-      if (node.getChildren()->at(0) != NULL) {
-        std::cout << "Node[0] == " << node.getChildren()->at(0) << std::endl;
-      }
-      /*
-       */
+  ai.printTree();
+  std::cout << "--------------" << std::endl;
+  for (int i = 0; i < 7; i++) {
+    for (int j = 0; j < 7; j++) {
+      std::cout << ai.getTree()->getChildren()->at(i)->getChildren()->at(j)
+                << std::endl;
     }
+  }
+  std::cout << "--------------" << std::endl;
+  */
+
+  int move;
+  move = ai.getNextMove();
+  while (running) {
     mBoard.printBoard();
-    takeInput(player);
+    int util = ai.getTree()->getUtility();
+    std::cout << util << std::endl;
+    move = takeInput(player);
+    if (mMultiplayer)
+      ai.applyMove(move);
+
     player = 2;
     mBoard.printBoard();
+    util = ai.getTree()->getUtility();
+    std::cout << util << std::endl;
     winner = mBoard.checkWin();
     if (winner != 0) {
+      mBoard.printBoard();
       std::cout << "Player" << winner << "wins!!!" << std::endl;
       break;
     }
 
-    takeInput(player);
+    if (mMultiplayer) {
+      takeInput(player);
+    } else {
+      getAIMove(ai, player);
+    }
     player = 1;
     winner = mBoard.checkWin();
     if (winner != 0) {
+      mBoard.printBoard();
       std::cout << "Player" << winner << "wins!!!" << std::endl;
       break;
     }
-    mBoard.printBoard();
-    turn++;
   }
 }
 
-void Game::takeInput(int player) {
+int Game::getAIMove(ABSearch ai, int player) {
+  int col = ai.getNextMove();
+  mBoard.placeToken(col, player);
+  ai.applyMove(col);
+  return col;
+}
+
+int Game::takeInput(int player) {
   int col;
   std::cout << "Player" << player << " enter your row. (1-7)" << std::endl;
   while (true) {
@@ -74,4 +95,5 @@ void Game::takeInput(int player) {
     }
   }
   mBoard.placeToken(col, player);
+  return col;
 }

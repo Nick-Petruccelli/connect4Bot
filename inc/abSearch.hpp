@@ -3,12 +3,11 @@
 #include "board.hpp"
 #include <array>
 #include <memory>
+#include <vector>
 
 class Node {
 public:
-  Node();
-  ~Node();
-  std::array<Node *, 7> *getChildren();
+  std::vector<Node *> *getChildren();
   void generateChildren(Board *curBoard);
   void setUtility(int utility);
   void setAlpha(int a);
@@ -20,7 +19,7 @@ public:
   int getBeta();
 
 private:
-  std::array<Node *, 7> mChildren;
+  std::vector<Node *> mChildren;
   int mNumChildren = 0;
   int mUtility;
   int mAlpha;
@@ -29,20 +28,23 @@ private:
 
 class ABSearch {
 public:
-  ABSearch();
+  ABSearch(int boardWidth, int boardHeight);
   ~ABSearch();
   void applyMove(int col);
   int getNextMove();
+  Node *getTree();
   void generateTree();
+  void printTree();
 
 protected:
   Board mBoard;
 
 private:
   Node *mTree = NULL;
-  Node *minMaxAB(Node *n);
+  void minMaxAB(Node *n);
   int findMaxAB(Node *n, int a, int b);
   int findMinAB(Node *n, int a, int b);
+  void dfsPrint(Node *n, int depth);
 
   friend class Node;
 };

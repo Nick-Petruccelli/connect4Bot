@@ -1,37 +1,53 @@
 #include "../inc/abSearch.hpp"
 #include "../inc/board.hpp"
+#include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
 
-ABSearch::ABSearch() : mBoard(7, 6) {}
+ABSearch::ABSearch(int boardWidth, int boardHeight)
+    : mBoard(boardWidth, boardHeight) {}
 ABSearch::~ABSearch() {
+  /*
   if (mTree != NULL)
     free(mTree);
+  */
 }
+
+Node *ABSearch::getTree() { return mTree; }
 
 void ABSearch::generateTree() {
   if (mTree != NULL) {
     free(mTree);
     mTree = NULL;
   }
-  static Node root;
-  root.generateChildren(&mBoard);
-  mTree = minMaxAB(&root);
+  mTree = new Node;
+  minMaxAB(mTree);
 }
 
-Node *ABSearch::minMaxAB(Node *root) {
+void ABSearch::minMaxAB(Node *root) {
   root->setUtility(findMaxAB(root, std::numeric_limits<int>::min(),
                              std::numeric_limits<int>::max()));
-  return root;
+  std::cout << "done" << std::endl;
 }
 
 int ABSearch::findMaxAB(Node *node, int a, int b) {
+  /*
+  mBoard.printBoard();
+  std::cout << "++++++++++++++++++++++++++" << std::endl;
+  */
+  int winner = mBoard.checkWin();
+  if (winner == 2)
+    winner = -1;
+  if (winner != 0) {
+    return winner;
+  }
   node->generateChildren(&mBoard);
-  std::array<Node *, 7> *children = node->getChildren();
+  std::vector<Node *> *children = node->getChildren();
   int numChildren = node->getNumChildren();
   if (numChildren == 0)
-    return mBoard.checkWin();
+    return winner;
   int best = std::numeric_limits<int>::min();
   node->setAlpha(a);
   node->setBeta(b);
@@ -42,23 +58,31 @@ int ABSearch::findMaxAB(Node *node, int a, int b) {
     mBoard.placeToken(i, 1);
     child->setUtility(findMinAB(child, node->getAlpha(), node->getBeta()));
     mBoard.removeToken(i);
-    best = best >= child->getUtility() ? best : child->getUtility();
-    if (best >= node->getBeta())
+    best = std::max(best, child->getUtility());
+    if (best >= node->getBeta()) {
       return best;
-    if (node->getAlpha() < best)
-      node->setAlpha(best);
+    }
+    node->setAlpha(std::max(node->getAlpha(), best));
   }
   return best;
 }
 
 int ABSearch::findMinAB(Node *node, int a, int b) {
+  /*
+  mBoard.printBoard();
+  std::cout << "++++++++++++++++++++++++++" << std::endl;
+  */
+  int winner = mBoard.checkWin();
+  if (winner == 2)
+    winner = -1;
+  if (winner != 0) {
+    return winner;
+  }
   node->generateChildren(&mBoard);
-  std::array<Node *, 7> *children = node->getChildren();
+  std::vector<Node *> *children = node->getChildren();
   int numChildren = node->getNumChildren();
   if (numChildren == 0)
-    return mBoard.checkWin();
-  if (mBoard.checkWin() != 0)
-    return mBoard.checkWin() == 1 ? 1 : -1;
+    return winner;
   int best = std::numeric_limits<int>::max();
   node->setAlpha(a);
   node->setBeta(b);
@@ -69,20 +93,33 @@ int ABSearch::findMinAB(Node *node, int a, int b) {
     mBoard.placeToken(i, 2);
     child->setUtility(findMaxAB(child, node->getAlpha(), node->getBeta()));
     mBoard.removeToken(i);
-    best = best <= child->getUtility() ? best : child->getUtility();
-    if (best <= node->getAlpha())
+    best = std::min(child->getUtility(), best);
+    if (best <= node->getAlpha()) {
       return best;
-    if (node->getBeta() > best)
-      node->setBeta(best);
+    }
+    node->setBeta(std::min(node->getBeta(), best));
   }
   return best;
 }
 
+void ABSearch::dfsPrint(Node *node, int depth) {
+  std::cout << "Util : " << node->getUtility() << "Depth: " << depth
+            << std::endl;
+  depth++;
+  for (int i = 0; i < mBoard.getBoardWidth(); i++) {
+    if (node->getChildren()->at(i) == nullptr)
+      continue;
+    dfsPrint(node->getChildren()->at(i), depth);
+  }
+}
+
+void ABSearch::printTree() { dfsPrint(mTree, 0); }
+
 int ABSearch::getNextMove() {
-  std::array<Node *, 7> *children = mTree->getChildren();
+  std::vector<Node *> *children = mTree->getChildren();
   int best = std::numeric_limits<int>::max();
   int col;
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < mBoard.getBoardWidth(); i++) {
     if (children->at(i)->getUtility() < best) {
       col = i;
       best = children->at(i)->getUtility();
@@ -91,27 +128,36 @@ int ABSearch::getNextMove() {
   return col;
 }
 
-Node::Node() {}
-Node::~Node() {}
+void ABSearch::applyMove(int col) {
+  std::vector<Node *> *children = mTree->getChildren();
+  if (children->at(col) == nullptr) {
+    std::cout << "hit" << std::endl;
+    minMaxAB(mTree);
+  }
+  mTree = children->at(col);
+}
 
 void Node::generateChildren(Board *curBoard) {
+  mChildren.resize(curBoard->getBoardWidth());
+  mChildren.clear();
+  mNumChildren = 0;
   bool *moves = curBoard->getValidMoves();
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < curBoard->getBoardWidth(); i++) {
     if (moves[i]) {
-      static Node child;
-      mChildren[i] = &child;
+      mChildren.insert(mChildren.begin() + i, new Node);
       mNumChildren++;
     } else {
-      mChildren[i] = nullptr;
+      mChildren.insert(mChildren.begin() + i, nullptr);
     }
   }
+  free(moves);
 }
 
 void Node::setUtility(int util) { mUtility = util; }
 void Node::setAlpha(int alpha) { mAlpha = alpha; }
 void Node::setBeta(int beta) { mBeta = beta; }
 
-std::array<Node *, 7> *Node::getChildren() { return &mChildren; }
+std::vector<Node *> *Node::getChildren() { return &mChildren; }
 int Node::getNumChildren() { return mNumChildren; }
 int Node::getUtility() { return mUtility; }
 int Node::getAlpha() { return mAlpha; }
